@@ -6,9 +6,12 @@
 function getUsernameFromUrl() {
     const hostname = window.location.hostname;
     
+    // Controlla se siamo su un dominio github.io (User Page)
     if (hostname.endsWith('.github.io')) {
+        // Estrai lo username dalla prima parte del dominio (es. 'aliennatione')
         let username = hostname.split('.')[0];
         
+        // Se il risultato è 'localhost' o un IP di test, torna null
         if (username === 'localhost' || username === '127' || !username) {
              return null; 
         }
@@ -16,6 +19,7 @@ function getUsernameFromUrl() {
         return username;
     }
     
+    // Ritorna null se non è un dominio GitHub Pages di formato noto.
     return null; 
 }
 
@@ -52,15 +56,18 @@ function createRepoElement(repo) {
     const li = document.createElement('li');
     li.className = 'repo-item';
     
+    // Nome e link
     const name = document.createElement('h3');
     name.innerHTML = `<a href="${repo.html_url}" target="_blank">${repo.name}</a>`;
     li.appendChild(name);
 
+    // Descrizione
     const desc = document.createElement('p');
     desc.className = 'description';
     desc.textContent = repo.description || 'Nessuna descrizione fornita.';
     li.appendChild(desc);
     
+    // Metadati (Lingua e Stelle)
     const details = document.createElement('div');
     details.className = 'metadata';
     details.innerHTML = `
@@ -84,6 +91,7 @@ function createRepoElement(repo) {
  * Funzione principale per recuperare e visualizzare i repository.
  */
 async function fetchAndDisplayRepos() {
+    // 1. Esegue il debug dello username prima della chiamata
     debugDisplayUsername(GITHUB_USERNAME); 
 
     if (!GITHUB_USERNAME) {
@@ -98,20 +106,23 @@ async function fetchAndDisplayRepos() {
         
         if (!response.ok) {
             console.error(`[API ERROR] Stato: ${response.status}. URL chiamata: ${REPOS_API_URL}`);
+            
             throw new Error(`Errore API: ${response.status} - Impossibile caricare i repository per l'utente ${GITHUB_USERNAME}.`);
         }
 
         const repositories = await response.json();
         
-        repoList.innerHTML = ''; 
+        repoList.innerHTML = ''; // Svuota il messaggio di caricamento
 
         if (repositories.length === 0) {
             repoList.innerHTML = `<li class="loading">Nessun repository pubblico trovato per ${GITHUB_USERNAME}.</li>`;
             return;
         }
 
+        // Ordina: prima i progetti più aggiornati
         repositories.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
 
+        // Popola la griglia
         repositories.forEach(repo => {
             repoList.appendChild(createRepoElement(repo));
         });
@@ -123,72 +134,5 @@ async function fetchAndDisplayRepos() {
 }
 
 
-// ==========================================================
-// INTEGRAZIONE MARKMAP STATICA
-// ==========================================================
-/**
- * Configura e renderizza la mappa mentale di esempio Markmap.
- * Usa l'oggetto globale 'markmap' fornito dal file bundle.
- */
-function setupMarkmap() {
-    const markmapContainer = document.getElementById('markmap-visualization');
-    
-    const markdownContent = `
-# Obiettivi del Portfolio v0.18.12
-## Funzionalità Base
-### Moduli Risolti
-- Problema CDN risolto con Bundle
-- Conflitto MIME type risolto
-- Sincronizzazione script gestita
-### Dati Dinamici
-- Recupero dei Repository da API
-- Visualizzazione ordinata
-## Prossimi Sviluppi
-### Idee
-- Filtro per linguaggio
-- Supporto al tema scuro
-    `;
-    
-    // Controlla che l'oggetto Markmap sia disponibile dalla finestra globale
-    if (markmapContainer && window.markmap && window.markmap.Markmap) { 
-        markmapContainer.innerHTML = ''; 
-        
-        // Estrai Transformer e Markmap dall'oggetto globale
-        const { Transformer, Markmap } = window.markmap;
-        
-        const transformer = new Transformer();
-        const { root } = transformer.transform(markdownContent);
-
-        Markmap.create(markmapContainer, {
-            preset: 'colorful' 
-        }, root);
-    } else {
-        console.warn("Markmap non è pronto o le librerie non sono state caricate.");
-    }
-}
-
-
-// Avvia il processo principale
+// Avvia il processo
 fetchAndDisplayRepos();
-// ... (tutto il codice fetchAndDisplayRepos e setupMarkmap) ...
-
-// Avvia il processo principale
-fetchAndDisplayRepos();
-
-// ==========================================================
-// AVVIO SICURO DI MARKMAP
-// ==========================================================
-function safeMarkmapStart() {
-    // Controlliamo ogni 50ms se la libreria Markmap è stata caricata dal CDN
-    if (window.markmap && window.markmap.Markmap) {
-        // La libreria è pronta, eseguiamo la funzione
-        setupMarkmap();
-    } else {
-        // Non è ancora pronta, riproviamo tra 50ms
-        console.info("Markmap non ancora pronto. Riprovo in 50ms...");
-        setTimeout(safeMarkmapStart, 50);
-    }
-}
-
-// Avvia il processo di controllo dopo che il DOM è caricato
-document.addEventListener('DOMContentLoaded', safeMarkmapStart);
