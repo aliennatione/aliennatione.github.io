@@ -1,71 +1,70 @@
 /**
- * Ricava lo username dall'hostname della pagina.
- * Copre: 
- * 1. Pagine Utente: "mioutente.github.io" -> "mioutente"
- * 2. Pagine Progetto: "mioutente.github.io/nome-repo" -> "mioutente"
- * 3. Test Locale: "localhost:port" -> "MIOTENTE_DI_TEST" (DEVI INSERIRE IL TUO USERNAME REALE QUI)
- * @returns {string|null} Lo username o null.
+ * Ottiene lo username dall'hostname della GitHub Pages.
+ * Copre il formato standard: "mioutente.github.io" -> "mioutente"
+ * @returns {string|null} Lo username ricavato.
  */
 function getUsernameFromUrl() {
     const hostname = window.location.hostname;
-
-    // Caso 1 & 2: Pagine Utente o Progetto ospitate su GitHub Pages
-    if (hostname.endsWith('.github.io') || hostname === 'localhost') {
-        
-        // Estrai lo username dalla prima parte del dominio (es. 'mioutente')
+    
+    // Controlla se siamo su un dominio github.io (User Page)
+    if (hostname.endsWith('.github.io')) {
+        // Estrai lo username dalla prima parte del dominio (es. 'aliennatione')
+        // Esempio: "aliennatione.github.io" -> ["aliennatione", "github", "io"]
         let username = hostname.split('.')[0];
-
-        // Se sei su localhost o un file locale, usa un valore di fallback
-        if (username === 'localhost' || hostname === '127.0.0.1') {
-             // ⚠️ INSERISCI IL TUO USERNAME DI GITHUB REALE QUI PER I TEST IN LOCALE ⚠️
-             return "IL_TUO_VERO_USERNAME_QUI"; 
-        }
         
-        // Ritorna lo username ricavato
+        // Se il risultato è un dominio di test locale o un IP, torna null
+        if (username === 'localhost' || username === '127') {
+             return null; 
+        }
+
         return username;
     }
     
-    // Fallback per domini personalizzati o altri casi non previsti
+    // Ritorna null se non è un dominio GitHub Pages di formato noto.
     return null; 
 }
 
-// ... all'inizio di script.js, dopo la definizione di GITHUB_USERNAME:
 const GITHUB_USERNAME = getUsernameFromUrl();
-
-// >>> TEMPORANEAMENTE PER IL DEBUG <<<
-alert('Username ricavato: ' + GITHUB_USERNAME); 
-// >>> FINE DEBUG <<<
-
-const repoList = document.getElementById('repositories-list'); 
-// ... il resto del codice ...
-
 const repoList = document.getElementById('repositories-list');
 const userDisplay = document.getElementById('user-display');
 
-// Aggiorna l'header con lo username dinamico
-userDisplay.textContent = GITHUB_USERNAME ? `${GITHUB_USERNAME}'s` : 'I Miei';
 
+// ==========================================================
+// FUNZIONE DI DEBUG: Mostra lo username in un elemento visibile
+// ==========================================================
+function debugDisplayUsername(username) {
+    if (userDisplay) {
+        if (username) {
+            userDisplay.textContent = `${username}'s`;
+            // Aggiunge un piccolo messaggio di debug per conferma
+            console.info(`[DEBUG] Username ricavato dall'URL: ${username}`);
+        } else {
+            userDisplay.textContent = 'I Miei';
+            console.warn("[DEBUG] Username non ricavato. Verificare che l'hostname sia nel formato 'username.github.io'.");
+        }
+    }
+}
+
+// ==========================================================
+// Funzioni di Rendering e API
+// ==========================================================
 
 /**
  * Genera l'HTML per un singolo repository.
- * @param {object} repo - L'oggetto repository dall'API di GitHub.
  */
 function createRepoElement(repo) {
     const li = document.createElement('li');
     li.className = 'repo-item';
     
-    // Nome e link
     const name = document.createElement('h3');
     name.innerHTML = `<a href="${repo.html_url}" target="_blank">${repo.name}</a>`;
     li.appendChild(name);
 
-    // Descrizione
     const desc = document.createElement('p');
     desc.className = 'description';
     desc.textContent = repo.description || 'Nessuna descrizione fornita.';
     li.appendChild(desc);
     
-    // Metadati (Lingua e Stelle)
     const details = document.createElement('div');
     details.className = 'metadata';
     details.innerHTML = `
@@ -88,8 +87,10 @@ function createRepoElement(repo) {
  * Funzione principale per recuperare e visualizzare i repository.
  */
 async function fetchAndDisplayRepos() {
+    debugDisplayUsername(GITHUB_USERNAME); // Esegue il debug
+
     if (!GITHUB_USERNAME) {
-        repoList.innerHTML = `<li class="error">Errore: Impossibile determinare lo username GitHub dall'URL.</li>`;
+        repoList.innerHTML = `<li class="error">Errore: Impossibile determinare lo username GitHub dall'URL. Usa "username.github.io".</li>`;
         return;
     }
 
@@ -99,34 +100,31 @@ async function fetchAndDisplayRepos() {
         const response = await fetch(REPOS_API_URL);
         
         if (!response.ok) {
-            // Gestione errore 404
+            // Se fallisce, qui GITHUB_USERNAME contiene un valore valido (es. 'aliennatione')
             throw new Error(`Errore API: ${response.status} - Impossibile caricare i repository per l'utente ${GITHUB_USERNAME}.`);
         }
 
         const repositories = await response.json();
         
-        // Svuota il messaggio di caricamento
-        repoList.innerHTML = ''; 
+        repoList.innerHTML = ''; // Svuota il messaggio di caricamento
 
         if (repositories.length === 0) {
             repoList.innerHTML = `<li class="loading">Nessun repository pubblico trovato per ${GITHUB_USERNAME}.</li>`;
             return;
         }
 
-        // Ordina: prima i progetti più aggiornati
         repositories.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
 
-        // Popola la griglia
         repositories.forEach(repo => {
-            // L'API di default restituisce solo i pubblici in questo endpoint
+            // L'API usata ritorna solo repository pubblici, quindi non serve un filtro esplicito
             repoList.appendChild(createRepoElement(repo));
         });
 
     } catch (error) {
         console.error("Errore nel recupero dei repository:", error);
-        repoList.innerHTML = `<li class="error">⚠️ Si è verificato un errore: ${error.message}</li>`;
+        repoList.innerHTML = `<li class="error">⚠️ Si è verificato un errore durante la chiamata: ${error.message}</li>`;
     }
 }
 
-// Avvia il processo quando la pagina è caricata
+// Avvia il processo
 fetchAndDisplayRepos();
