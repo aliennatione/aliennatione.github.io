@@ -178,5 +178,14 @@ function setupMarkmap() {
 
 
 // Avvia il processo principale al caricamento della pagina
+// ... (tutto il codice fetchAndDisplayRepos e setupMarkmap)
+
+// Avvia il processo principale al caricamento della pagina
 fetchAndDisplayRepos();
-document.addEventListener('DOMContentLoaded', setupMarkmap);
+
+// MODIFICA QUI: Esegui setupMarkmap con un breve ritardo per garantire che le librerie del CDN siano pronte.
+// Si usa un DOMContentLoaded per la logica principale, ma Markmap ha bisogno di un ulteriore ritardo.
+document.addEventListener('DOMContentLoaded', () => {
+    // Aggiungiamo un piccolo ritardo (es. 100ms) per dare il tempo alle librerie esterne di inizializzarsi
+    setTimeout(setupMarkmap, 100); 
+});
