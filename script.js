@@ -1,16 +1,32 @@
 /**
- * Ottiene lo username dall'hostname della GitHub Pages.
- * Esempio: "mioutente.github.io" -> "mioutente"
+ * Ricava lo username dall'hostname della pagina.
+ * Copre: 
+ * 1. Pagine Utente: "mioutente.github.io" -> "mioutente"
+ * 2. Pagine Progetto: "mioutente.github.io/nome-repo" -> "mioutente"
+ * 3. Test Locale: "localhost:port" -> "MIOTENTE_DI_TEST" (DEVI INSERIRE IL TUO USERNAME REALE QUI)
+ * @returns {string|null} Lo username o null.
  */
 function getUsernameFromUrl() {
     const hostname = window.location.hostname;
-    
-    if (hostname.endsWith('.github.io')) {
-        // Splitta per '.' e prende la prima parte (lo username)
-        return hostname.split('.')[0];
+
+    // Caso 1 & 2: Pagine Utente o Progetto ospitate su GitHub Pages
+    if (hostname.endsWith('.github.io') || hostname === 'localhost') {
+        
+        // Estrai lo username dalla prima parte del dominio (es. 'mioutente')
+        let username = hostname.split('.')[0];
+
+        // Se sei su localhost o un file locale, usa un valore di fallback
+        if (username === 'localhost' || hostname === '127.0.0.1') {
+             // ⚠️ INSERISCI IL TUO USERNAME DI GITHUB REALE QUI PER I TEST IN LOCALE ⚠️
+             return "IL_TUO_VERO_USERNAME_QUI"; 
+        }
+        
+        // Ritorna lo username ricavato
+        return username;
     }
-    // Caso di fallback (es. se la pagina è ospitata altrove)
-    return 'github'; // Puoi mettere qui un username noto per test
+    
+    // Fallback per domini personalizzati o altri casi non previsti
+    return null; 
 }
 
 const GITHUB_USERNAME = getUsernameFromUrl();
