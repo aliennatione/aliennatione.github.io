@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portfolio Personale su GitHub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <link href="[https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap](https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap)" rel="stylesheet">
     <style>
         :root {
             --primary-color: #0366d6;
@@ -35,7 +36,6 @@
             font-weight: 700;
             color: var(--primary-color);
         }
-        /* --- Lista Progetti --- */
         .repo-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -65,12 +65,9 @@
             color: var(--primary-color);
             text-decoration: none;
         }
-        .repo-item a:hover {
-            text-decoration: underline;
-        }
         .repo-item p.description {
             color: var(--secondary-text);
-            flex-grow: 1; /* Permette alla descrizione di occupare lo spazio */
+            flex-grow: 1;
             margin-bottom: 15px;
             font-size: 0.95em;
         }
@@ -87,18 +84,22 @@
             color: var(--text-color);
         }
         .loading, .error {
-            grid-column: 1 / -1; /* Occupa tutta la larghezza in caso di errore/caricamento */
+            grid-column: 1 / -1; 
             text-align: center;
             padding: 20px;
             color: var(--secondary-text);
         }
-        /* --- Sezione Markmap (Opzionale) --- */
+        /* Markmap Section */
         #markmap-container {
             margin-top: 50px;
             padding: 20px;
             border-top: 2px solid var(--primary-color);
         }
     </style>
+
+    <script src="[https://cdn.jsdelivr.net/npm/d3@7](https://cdn.jsdelivr.net/npm/d3@7)"></script>
+    <script src="[https://cdn.jsdelivr.net/npm/markmap-lib@0.17/dist/browser/index.js](https://cdn.jsdelivr.net/npm/markmap-lib@0.17/dist/browser/index.js)"></script>
+    <script src="[https://cdn.jsdelivr.net/npm/markmap-view@0.17/dist/index.js](https://cdn.jsdelivr.net/npm/markmap-view@0.17/dist/index.js)"></script>
 </head>
 <body>
 
@@ -115,11 +116,9 @@
         </ul>
 
         <div id="markmap-container">
-            <h2>Visualizzazione ad Albero (Markmap)</h2>
-            <p>Se utilizzi Markmap (richiede logica di parsing extra), il diagramma apparirà qui.</p>
+            <h2>Struttura Concettuale (Markmap)</h2>
             <div id="markmap-visualization" style="height: 300px; border: 1px solid #ccc;">
-                <p style="text-align: center; padding-top: 50px;">Contenitore per la Markmap. L'integrazione richiede un library loader e il parsing del README.</p>
-            </div>
+                </div>
         </div>
     </div>
 
