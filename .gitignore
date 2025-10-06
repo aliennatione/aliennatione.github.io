@@ -1,0 +1,10 @@
+# Dipendenze
+/node_modules
+/vendor
+
+# MacOS
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
