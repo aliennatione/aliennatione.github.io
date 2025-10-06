@@ -170,9 +170,25 @@ function setupMarkmap() {
 
 // Avvia il processo principale
 fetchAndDisplayRepos();
+// ... (tutto il codice fetchAndDisplayRepos e setupMarkmap) ...
 
-// Esegui la Markmap dopo un breve ritardo per garantire il caricamento completo del bundle Markmap-HTML
-document.addEventListener('DOMContentLoaded', () => {
-    // 100ms per dare il tempo al codice del CDN di inizializzare le variabili globali
-    setTimeout(setupMarkmap, 100); 
-});
+// Avvia il processo principale
+fetchAndDisplayRepos();
+
+// ==========================================================
+// AVVIO SICURO DI MARKMAP
+// ==========================================================
+function safeMarkmapStart() {
+    // Controlliamo ogni 50ms se la libreria Markmap è stata caricata dal CDN
+    if (window.markmap && window.markmap.Markmap) {
+        // La libreria è pronta, eseguiamo la funzione
+        setupMarkmap();
+    } else {
+        // Non è ancora pronta, riproviamo tra 50ms
+        console.info("Markmap non ancora pronto. Riprovo in 50ms...");
+        setTimeout(safeMarkmapStart, 50);
+    }
+}
+
+// Avvia il processo di controllo dopo che il DOM è caricato
+document.addEventListener('DOMContentLoaded', safeMarkmapStart);
