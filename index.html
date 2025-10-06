@@ -3,24 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio di MIOTENTE</title>
+    <title>Portfolio Personale su GitHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .repo-list { list-style: none; padding: 0; }
-        .repo-item { border: 1px solid #ddd; margin-bottom: 10px; padding: 15px; border-radius: 5px; }
-        .repo-item h3 { margin-top: 0; }
-        .repo-item a { text-decoration: none; color: #0366d6; font-weight: bold; }
-        .loading { font-style: italic; color: #6a737d; }
+        :root {
+            --primary-color: #0366d6;
+            --background-color: #f6f8fa;
+            --card-background: #ffffff;
+            --border-color: #e1e4e8;
+            --text-color: #24292e;
+            --secondary-text: #586069;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        header h1 {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        /* --- Lista Progetti --- */
+        .repo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            list-style: none;
+            padding: 0;
+        }
+        .repo-item {
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+        .repo-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .repo-item h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.4em;
+        }
+        .repo-item a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        .repo-item a:hover {
+            text-decoration: underline;
+        }
+        .repo-item p.description {
+            color: var(--secondary-text);
+            flex-grow: 1; /* Permette alla descrizione di occupare lo spazio */
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+        .metadata {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8em;
+            color: var(--secondary-text);
+            padding-top: 10px;
+            border-top: 1px dashed var(--border-color);
+        }
+        .language {
+            font-weight: 700;
+            color: var(--text-color);
+        }
+        .loading, .error {
+            grid-column: 1 / -1; /* Occupa tutta la larghezza in caso di errore/caricamento */
+            text-align: center;
+            padding: 20px;
+            color: var(--secondary-text);
+        }
+        /* --- Sezione Markmap (Opzionale) --- */
+        #markmap-container {
+            margin-top: 50px;
+            padding: 20px;
+            border-top: 2px solid var(--primary-color);
+        }
     </style>
 </head>
 <body>
 
-    <h1>I miei Progetti Pubblici su GitHub</h1>
-    <p>Elenco generato dinamicamente tramite l'API REST di GitHub.</p>
+    <div class="container">
+        <header>
+            <h1><span id="user-display">I Miei</span> Progetti Open Source 🚀</h1>
+            <p>Elenco generato dinamicamente consultando l'API REST di GitHub.</p>
+        </header>
 
-    <ul id="repositories-list" class="repo-list">
-        <li class="loading">Caricamento dei repository...</li>
-    </ul>
+        <h2>Repository Pubblici</h2>
+        
+        <ul id="repositories-list" class="repo-grid">
+            <li class="loading">Caricamento dei repository...</li>
+        </ul>
+
+        <div id="markmap-container">
+            <h2>Visualizzazione ad Albero (Markmap)</h2>
+            <p>Se utilizzi Markmap (richiede logica di parsing extra), il diagramma apparirà qui.</p>
+            <div id="markmap-visualization" style="height: 300px; border: 1px solid #ccc;">
+                <p style="text-align: center; padding-top: 50px;">Contenitore per la Markmap. L'integrazione richiede un library loader e il parsing del README.</p>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 
