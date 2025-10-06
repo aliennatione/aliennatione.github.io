@@ -1,6 +1,6 @@
 /**
  * Ottiene lo username dall'hostname della GitHub Pages.
- * Copre il formato standard: "mioutente.github.io" -> "mioutente"
+ * Formato supportato: "mioutente.github.io" -> "mioutente"
  * @returns {string|null} Lo username ricavato.
  */
 function getUsernameFromUrl() {
@@ -9,10 +9,9 @@ function getUsernameFromUrl() {
     // Controlla se siamo su un dominio github.io (User Page)
     if (hostname.endsWith('.github.io')) {
         // Estrai lo username dalla prima parte del dominio (es. 'aliennatione')
-        // Esempio: "aliennatione.github.io" -> ["aliennatione", "github", "io"]
         let username = hostname.split('.')[0];
         
-        // Se il risultato è un dominio di test locale o un IP, torna null
+        // Se il risultato è 'localhost' o un IP di test, torna null
         if (username === 'localhost' || username === '127') {
              return null; 
         }
@@ -24,47 +23,52 @@ function getUsernameFromUrl() {
     return null; 
 }
 
+// ==========================================================
+// Dichiarazioni Globali (Dichiarate SOLO qui una volta)
+// ==========================================================
 const GITHUB_USERNAME = getUsernameFromUrl();
 const repoList = document.getElementById('repositories-list');
 const userDisplay = document.getElementById('user-display');
 
 
-// ==========================================================
-// FUNZIONE DI DEBUG: Mostra lo username in un elemento visibile
-// ==========================================================
+/**
+ * FUNZIONE DI DEBUG: Aggiorna l'header e logga lo username.
+ * @param {string|null} username - Lo username ricavato.
+ */
 function debugDisplayUsername(username) {
     if (userDisplay) {
         if (username) {
             userDisplay.textContent = `${username}'s`;
-            // Aggiunge un piccolo messaggio di debug per conferma
-            console.info(`[DEBUG] Username ricavato dall'URL: ${username}`);
+            // Log nella console per debug
+            console.info(`[DEBUG] Username ricavato dall'URL e utilizzato per API: ${username}`);
         } else {
             userDisplay.textContent = 'I Miei';
-            console.warn("[DEBUG] Username non ricavato. Verificare che l'hostname sia nel formato 'username.github.io'.");
+            console.warn("[DEBUG] Username non ricavato. Assicurati che l'hostname sia nel formato 'username.github.io'.");
         }
     }
 }
 
-// ==========================================================
-// Funzioni di Rendering e API
-// ==========================================================
 
 /**
  * Genera l'HTML per un singolo repository.
+ * @param {object} repo - L'oggetto repository dall'API di GitHub.
  */
 function createRepoElement(repo) {
     const li = document.createElement('li');
     li.className = 'repo-item';
     
+    // Nome e link
     const name = document.createElement('h3');
     name.innerHTML = `<a href="${repo.html_url}" target="_blank">${repo.name}</a>`;
     li.appendChild(name);
 
+    // Descrizione
     const desc = document.createElement('p');
     desc.className = 'description';
     desc.textContent = repo.description || 'Nessuna descrizione fornita.';
     li.appendChild(desc);
     
+    // Metadati (Lingua e Stelle)
     const details = document.createElement('div');
     details.className = 'metadata';
     details.innerHTML = `
@@ -83,14 +87,16 @@ function createRepoElement(repo) {
     return li;
 }
 
+
 /**
  * Funzione principale per recuperare e visualizzare i repository.
  */
 async function fetchAndDisplayRepos() {
-    debugDisplayUsername(GITHUB_USERNAME); // Esegue il debug
+    // 1. Esegue il debug dello username prima della chiamata
+    debugDisplayUsername(GITHUB_USERNAME); 
 
     if (!GITHUB_USERNAME) {
-        repoList.innerHTML = `<li class="error">Errore: Impossibile determinare lo username GitHub dall'URL. Usa "username.github.io".</li>`;
+        repoList.innerHTML = `<li class="error">Errore: Impossibile determinare lo username GitHub dall'URL.</li>`;
         return;
     }
 
@@ -100,7 +106,9 @@ async function fetchAndDisplayRepos() {
         const response = await fetch(REPOS_API_URL);
         
         if (!response.ok) {
-            // Se fallisce, qui GITHUB_USERNAME contiene un valore valido (es. 'aliennatione')
+            // Logga lo stato esatto dell'errore (404, 403, ecc.)
+            console.error(`[API ERROR] Stato: ${response.status}. URL chiamata: ${REPOS_API_URL}`);
+            
             throw new Error(`Errore API: ${response.status} - Impossibile caricare i repository per l'utente ${GITHUB_USERNAME}.`);
         }
 
@@ -113,16 +121,17 @@ async function fetchAndDisplayRepos() {
             return;
         }
 
+        // Ordina: prima i progetti più aggiornati
         repositories.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
 
+        // Popola la griglia
         repositories.forEach(repo => {
-            // L'API usata ritorna solo repository pubblici, quindi non serve un filtro esplicito
             repoList.appendChild(createRepoElement(repo));
         });
 
     } catch (error) {
-        console.error("Errore nel recupero dei repository:", error);
-        repoList.innerHTML = `<li class="error">⚠️ Si è verificato un errore durante la chiamata: ${error.message}</li>`;
+        console.error("Errore irreversibile nel recupero:", error);
+        repoList.innerHTML = `<li class="error">⚠️ Si è verificato un errore durante la chiamata: ${error.message}. Verifica la console per dettagli.</li>`;
     }
 }
 
