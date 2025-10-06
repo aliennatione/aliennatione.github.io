@@ -7,10 +7,8 @@ function getUsernameFromUrl() {
     const hostname = window.location.hostname;
     
     if (hostname.endsWith('.github.io')) {
-        // Estrai lo username dalla prima parte del dominio (es. 'aliennatione')
         let username = hostname.split('.')[0];
         
-        // Evita nomi di dominio non validi (localhost per User Pages)
         if (username === 'localhost' || username === '127' || !username) {
              return null; 
         }
@@ -18,12 +16,11 @@ function getUsernameFromUrl() {
         return username;
     }
     
-    // Per domini custom o test locali complessi, ritorniamo null.
     return null; 
 }
 
 // ==========================================================
-// Dichiarazioni Globali (Appaiono solo qui)
+// Dichiarazioni Globali
 // ==========================================================
 const GITHUB_USERNAME = getUsernameFromUrl();
 const repoList = document.getElementById('repositories-list');
@@ -31,14 +28,13 @@ const userDisplay = document.getElementById('user-display');
 
 
 /**
- * FUNZIONE DI DEBUG: Aggiorna l'header e logga lo username per la diagnostica.
+ * FUNZIONE DI DEBUG: Aggiorna l'header e logga lo username.
  * @param {string|null} username - Lo username ricavato.
  */
 function debugDisplayUsername(username) {
     if (userDisplay) {
         if (username) {
             userDisplay.textContent = `${username}'s`;
-            // Log nella console per debug
             console.info(`[DEBUG] Username ricavato dall'URL e utilizzato per API: ${username}`);
         } else {
             userDisplay.textContent = 'I Miei';
@@ -88,7 +84,6 @@ function createRepoElement(repo) {
  * Funzione principale per recuperare e visualizzare i repository.
  */
 async function fetchAndDisplayRepos() {
-    // 1. Esegue il debug dello username prima della chiamata
     debugDisplayUsername(GITHUB_USERNAME); 
 
     if (!GITHUB_USERNAME) {
@@ -103,23 +98,20 @@ async function fetchAndDisplayRepos() {
         
         if (!response.ok) {
             console.error(`[API ERROR] Stato: ${response.status}. URL chiamata: ${REPOS_API_URL}`);
-            
             throw new Error(`Errore API: ${response.status} - Impossibile caricare i repository per l'utente ${GITHUB_USERNAME}.`);
         }
 
         const repositories = await response.json();
         
-        repoList.innerHTML = ''; // Svuota il messaggio di caricamento
+        repoList.innerHTML = ''; 
 
         if (repositories.length === 0) {
             repoList.innerHTML = `<li class="loading">Nessun repository pubblico trovato per ${GITHUB_USERNAME}.</li>`;
             return;
         }
 
-        // Ordina: prima i progetti più aggiornati
         repositories.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
 
-        // Popola la griglia
         repositories.forEach(repo => {
             repoList.appendChild(createRepoElement(repo));
         });
@@ -136,39 +128,38 @@ async function fetchAndDisplayRepos() {
 // ==========================================================
 /**
  * Configura e renderizza la mappa mentale di esempio Markmap.
+ * Usa l'oggetto globale 'markmap' fornito dal file bundle.
  */
 function setupMarkmap() {
     const markmapContainer = document.getElementById('markmap-visualization');
     
-    // Contenuto Markdown statico di esempio
     const markdownContent = `
-# Obiettivi del Portfolio
+# Obiettivi del Portfolio v0.18.12
 ## Funzionalità Base
-### Requisiti
-- Recupero dinamico dei repo
-- Design responsive
-### Sicurezza
-- Solo chiamate lato client
-- Nessun token esposto
+### Moduli Risolti
+- Problema CDN risolto con Bundle
+- Conflitto MIME type risolto
+- Sincronizzazione script gestita
+### Dati Dinamici
+- Recupero dei Repository da API
+- Visualizzazione ordinata
 ## Prossimi Sviluppi
 ### Idee
 - Filtro per linguaggio
-- Pagina di dettaglio progetto
+- Supporto al tema scuro
     `;
     
-    // Controlla che il contenitore e le librerie siano disponibili
-    if (markmapContainer && window.markmap && window.markmap.Markmap) {
-        markmapContainer.innerHTML = ''; // Rimuovi il placeholder
+    // Controlla che l'oggetto Markmap sia disponibile dalla finestra globale
+    if (markmapContainer && window.markmap && window.markmap.Markmap) { 
+        markmapContainer.innerHTML = ''; 
         
-        const { Markmap } = window.markmap;
+        // Estrai Transformer e Markmap dall'oggetto globale
+        const { Transformer, Markmap } = window.markmap;
         
-        // 1. Trasforma il Markdown in dati per la mappa
-        const transformer = new markmap.Transformer();
+        const transformer = new Transformer();
         const { root } = transformer.transform(markdownContent);
 
-        // 2. Crea la mappa nel contenitore SVG
         Markmap.create(markmapContainer, {
-            // Opzioni di visualizzazione
             preset: 'colorful' 
         }, root);
     } else {
@@ -177,15 +168,11 @@ function setupMarkmap() {
 }
 
 
-// Avvia il processo principale al caricamento della pagina
-// ... (tutto il codice fetchAndDisplayRepos e setupMarkmap)
-
-// Avvia il processo principale al caricamento della pagina
+// Avvia il processo principale
 fetchAndDisplayRepos();
 
-// MODIFICA QUI: Esegui setupMarkmap con un breve ritardo per garantire che le librerie del CDN siano pronte.
-// Si usa un DOMContentLoaded per la logica principale, ma Markmap ha bisogno di un ulteriore ritardo.
+// Esegui la Markmap dopo un breve ritardo per garantire il caricamento completo del bundle Markmap-HTML
 document.addEventListener('DOMContentLoaded', () => {
-    // Aggiungiamo un piccolo ritardo (es. 100ms) per dare il tempo alle librerie esterne di inizializzarsi
+    // 100ms per dare il tempo al codice del CDN di inizializzare le variabili globali
     setTimeout(setupMarkmap, 100); 
 });
