@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio di MIOTENTE</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .repo-list { list-style: none; padding: 0; }
+        .repo-item { border: 1px solid #ddd; margin-bottom: 10px; padding: 15px; border-radius: 5px; }
+        .repo-item h3 { margin-top: 0; }
+        .repo-item a { text-decoration: none; color: #0366d6; font-weight: bold; }
+        .loading { font-style: italic; color: #6a737d; }
+    </style>
+</head>
+<body>
+
+    <h1>I miei Progetti Pubblici su GitHub</h1>
+    <p>Elenco generato dinamicamente tramite l'API REST di GitHub.</p>
+
+    <ul id="repositories-list" class="repo-list">
+        <li class="loading">Caricamento dei repository...</li>
+    </ul>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
