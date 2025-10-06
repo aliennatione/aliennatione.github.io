@@ -29,7 +29,16 @@ function getUsernameFromUrl() {
     return null; 
 }
 
+// ... all'inizio di script.js, dopo la definizione di GITHUB_USERNAME:
 const GITHUB_USERNAME = getUsernameFromUrl();
+
+// >>> TEMPORANEAMENTE PER IL DEBUG <<<
+alert('Username ricavato: ' + GITHUB_USERNAME); 
+// >>> FINE DEBUG <<<
+
+const repoList = document.getElementById('repositories-list'); 
+// ... il resto del codice ...
+
 const repoList = document.getElementById('repositories-list');
 const userDisplay = document.getElementById('user-display');
 
