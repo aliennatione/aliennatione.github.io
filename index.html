@@ -4,110 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portfolio Personale su GitHub</title>
-    
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #0366d6;
-            --background-color: #f6f8fa;
-            --card-background: #ffffff;
-            --border-color: #e1e4e8;
-            --text-color: #24292e;
-            --secondary-text: #586069;
-        }
-        body {
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        header h1 {
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-        .repo-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            list-style: none;
-            padding: 0;
-        }
-        .repo-item {
-            background: var(--card-background);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 20px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: flex;
-            flex-direction: column;
-        }
-        .repo-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        .repo-item h3 {
-            margin-top: 0;
-            margin-bottom: 10px;
-            font-size: 1.4em;
-        }
-        .repo-item a {
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-        .repo-item p.description {
-            color: var(--secondary-text);
-            flex-grow: 1;
-            margin-bottom: 15px;
-            font-size: 0.95em;
-        }
-        .metadata {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8em;
-            color: var(--secondary-text);
-            padding-top: 10px;
-            border-top: 1px dashed var(--border-color);
-        }
-        .language {
-            font-weight: 700;
-            color: var(--text-color);
-        }
-        .loading, .error {
-            grid-column: 1 / -1; 
-            text-align: center;
-            padding: 20px;
-            color: var(--secondary-text);
-        }
+        :root { --primary-color:#0366d6; --background-color:#f6f8fa; --card-background:#ffffff; --border-color:#e1e4e8; --text-color:#24292e; --secondary-text:#586069; }
+        body { font-family:'Roboto',sans-serif; margin:0; padding:0; background:var(--background-color); color:var(--text-color); line-height:1.6; }
+        .container { max-width:1200px; margin:40px auto; padding:0 20px; }
+        header { text-align:center; margin-bottom:30px; }
+        header h1 { font-weight:700; color:var(--primary-color); }
+        .controls { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px; justify-content:center; }
+        .controls input, .controls select, .controls button { padding:8px 12px; border:1px solid var(--border-color); border-radius:6px; }
+        .controls button { background:var(--primary-color); color:#fff; border:none; cursor:pointer; }
+        .section { margin-bottom:40px; }
+        .section h2 { border-bottom:2px solid var(--primary-color); padding-bottom:6px; }
+        .repo-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; list-style:none; padding:0; }
+        .repo-item { background:var(--card-background); border:1px solid var(--border-color); border-radius:6px; padding:20px; transition:transform .2s,box-shadow .2s; display:flex; flex-direction:column; }
+        .repo-item:hover { transform:translateY(-5px); box-shadow:0 4px 12px rgba(0,0,0,.1); }
+        .repo-item h3 { margin:0 0 10px; font-size:1.3em; }
+        .repo-item a { color:var(--primary-color); text-decoration:none; }
+        .repo-item p.description { color:var(--secondary-text); flex-grow:1; margin-bottom:10px; font-size:.95em; }
+        .topics { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+        .topic { background:#eef2f7; border:1px solid var(--border-color); border-radius:12px; padding:2px 8px; font-size:.75em; color:var(--secondary-text); }
+        .metadata { display:flex; justify-content:space-between; font-size:.8em; color:var(--secondary-text); padding-top:10px; border-top:1px dashed var(--border-color); }
+        .language { font-weight:700; color:var(--text-color); }
+        .loading,.error { grid-column:1/-1; text-align:center; padding:20px; color:var(--secondary-text); }
+        .badge { font-size:.7em; padding:2px 6px; border-radius:4px; margin-left:6px; }
+        .badge.private { background:#fff3cd; color:#856404; }
+        .badge.fork { background:#e2e3e5; color:#383d41; }
     </style>
 </head>
 <body>
-
     <div class="container">
         <header>
-            <h1><span id="user-display">I Miei</span> Progetti Open Source 🚀</h1>
+            <h1><span id="user-display">I Miei</span> Progetti 🚀</h1>
             <p>Elenco generato dinamicamente consultando l'API REST di GitHub.</p>
         </header>
 
-        <h2>Repository Pubblici</h2>
-        
-        <ul id="repositories-list" class="repo-grid">
-            <li class="loading">Caricamento dei repository...</li>
-        </ul>
-
+        <div class="controls">
+            <input id="search" type="text" placeholder="Cerca repo..." />
+            <select id="visibility">
+                <option value="all">Tutti</option>
+                <option value="public">Pubblici</option>
+                <option value="private">Privati</option>
+            </select>
+            <select id="sort">
+                <option value="updated">Più recenti</option>
+                <option value="name">Nome</option>
+                <option value="stars">Stelle</option>
+            </select>
+            <button id="auth-btn">Accedi con PAT</button>
+            <button id="clear-auth">Logout</button>
         </div>
 
+        <div id="sections"></div>
+    </div>
     <script src="script.js"></script>
-
 </body>
 </html>
